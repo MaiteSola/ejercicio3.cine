@@ -1,13 +1,14 @@
-package ejercicio3.cine;
+package ejercicio3.cine.v2;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Taquilla implements Runnable {
 
 	private Duration tiempoDeVentaDeEntradas;
 	private SalaProyeccion sala;
-	private ColaEntradas cola;
+	private ArrayList<ColaEntradas> listaColas;
 	private String nombre;
 
 	public String getNombre() {
@@ -30,22 +31,22 @@ public class Taquilla implements Runnable {
 		return sala;
 	}
 
-	public ColaEntradas getCola() {
-		return cola;
+	public ArrayList<ColaEntradas> getListaColas() {
+		return listaColas;
+	}
+
+	public void setListaColas(ArrayList<ColaEntradas> listaColas) {
+		this.listaColas = listaColas;
 	}
 
 	public void setSala(SalaProyeccion sala) {
 		this.sala = sala;
 	}
 
-	public void setCola(ColaEntradas cola) {
-		this.cola = cola;
-	}
-
-	public Taquilla(SalaProyeccion sala, ColaEntradas cola, String nombre) {
+	public Taquilla(SalaProyeccion sala, ArrayList<ColaEntradas> listaColas, String nombre) {
 		super();
 		this.sala = sala;
-		this.cola = cola;
+		this.listaColas = listaColas;
 		this.nombre = nombre;
 		this.tiempoDeVentaDeEntradas = Configuracion.TIEMPO_DE_VENTA_ENTRADAS_EN_MINUTOS;
 	}
@@ -59,33 +60,45 @@ public class Taquilla implements Runnable {
 
 			while (System.currentTimeMillis() < tiempoFin && !Thread.currentThread().isInterrupted()) {
 
-				// 1. Coger un cliente de la cola
+				Cliente cliente = null;
+				boolean todasCerradasYVacias = true;
+				String nombreColaUsada = "";
 
-				Cliente cliente = cola.extraerCliente();
+				for (ColaEntradas cola : listaColas) {
 
-				if (cliente == null) {
-					System.out.println(Thread.currentThread().getName() + " la cola está vacía y cerrada.");
-					break;
+					if (cola.clientesRestantes() > 0) {
+						cliente = cola.extraerCliente();
+						if (cliente != null) {
+							nombreColaUsada = cola.getNombre();
+							break;
+						}
+					}
+
+					if (cola.isColaAbierta()) {
+						todasCerradasYVacias = false;
+					}
 				}
 
+				
 				if (cliente != null) {
 
 					if (sala.reservarAsiento()) {
 						venderEntrada();
-						System.out.println(Thread.currentThread().getName() + "vendida a: " + cliente);
-
+						System.out.println(nombre + " vendió a: " + cliente + " de la fila "+nombreColaUsada);
 					} else {
+						System.out.println("SALA LLENA. " + nombre + " cierra.");
+						break;
+					}
+				} else {
 
-						System.out.println("Sala llena. El cliente " + cliente + " se va sin entrada.");
-						break; // Cierro taquilla porque no hay más clientes
+					if (todasCerradasYVacias) {
+						System.out.println(nombre + " ve todas las colas cerradas y vacías. Se retira.");
+						break;
 					}
 
+					Thread.sleep(100);
 				}
-
 			}
-
-			System.out.println(Thread.currentThread().getName() + " ha cerrado venta de entradas.");
-
 		} catch (InterruptedException e) {
 
 			System.out.println(Thread.currentThread().getName() + ": Venta interrumpida");

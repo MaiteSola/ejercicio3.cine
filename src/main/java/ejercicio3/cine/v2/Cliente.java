@@ -1,4 +1,4 @@
-package ejercicio3.cine;
+package ejercicio3.cine.v2;
 
 public class Cliente {
 
