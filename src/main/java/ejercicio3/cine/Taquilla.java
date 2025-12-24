@@ -63,11 +63,16 @@ public class Taquilla implements Runnable {
 
 				Cliente cliente = cola.extraerCliente();
 
+				if (cliente == null) {
+					System.out.println(Thread.currentThread().getName() + " la cola está vacía y cerrada.");
+					break;
+				}
+
 				if (cliente != null) {
 
 					if (sala.reservarAsiento()) {
 						venderEntrada();
-						System.out.println(Thread.currentThread().getName()+ "vendida a: "+ cliente);
+						System.out.println(Thread.currentThread().getName() + "vendida a: " + cliente);
 
 					} else {
 
@@ -87,16 +92,18 @@ public class Taquilla implements Runnable {
 			Thread.currentThread().interrupt();
 
 		}
-		System.out.println(Thread.currentThread().getName()+ "ha cerrado su ventana de venta.");
+		System.out.println(Thread.currentThread().getName() + "ha cerrado su ventana de venta.");
 
 	}
 
 	public void venderEntrada() throws InterruptedException {
 
-		int tiempoVentaSegundos = ThreadLocalRandom.current().nextInt(Configuracion.TIEMPO_MIN_VENTA_SEG,
+		int tiempoVenta = ThreadLocalRandom.current().nextInt(Configuracion.TIEMPO_MIN_VENTA_SEG,
 				Configuracion.TIEMPO_MAX_VENTA_SEG + 1);
 
-		Thread.sleep(tiempoVentaSegundos * 1000); // Convertimos en milisegundos
+		//Convertimos en ms y dividos por el factor velocidad para la simulación
+		long tiempoFinal = (tiempoVenta * 1000L) / Configuracion.FACTOR_VELOCIDAD;
+		Thread.sleep(tiempoFinal);
 
 	}
 

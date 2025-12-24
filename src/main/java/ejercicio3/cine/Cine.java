@@ -29,13 +29,15 @@ public class Cine {
 		h1.join();
 		h2.join();
 		long finVenta = System.currentTimeMillis();
+		
+		int clientesSinEntradaTotales = sala.getClientesSinEntrada() + cola.clientesRestantes();
 
 		// 5 Mostrar resultados
 		System.out.println("===RESUMEN===");
 		System.out.println(
 				"Ventas exitosas: " + sala.getClientesAtendidosConExito() + " personas han conseguido entrada");
 		System.out.println(
-				"Clientes sin entrada: " + sala.getAsientosDisponibles() + " personas no han conseguido entrada.");
+				"Clientes sin entrada: " + clientesSinEntradaTotales + " personas no han conseguido entrada.");
 		System.out.println("Tiempo venta: " + (finVenta - inicioVenta) / 1000 + " segundos ha durado la venta.");
 
 	}
